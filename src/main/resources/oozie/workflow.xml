@@ -1,0 +1,38 @@
+<workflow-app name="Test_Spark_Workflow" xmlns="uri:oozie:workflow:0.5">
+    <start to="spark-608b"/>
+    <kill name="Kill">
+        <message>Action failed, error message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+    </kill>
+    <action name="spark-608b">
+        <spark xmlns="uri:oozie:spark-action:0.1">
+            <job-tracker>${jobTracker}</job-tracker>
+            <name-node>${nameNode}</name-node>
+            <configuration>
+                <property>
+                    <name>spark.executor.memory</name>
+                    <value>5g</value>
+                </property>
+                <property>
+                    <name>spark.shuffle.file.buffer</name>
+                    <value>100m</value>
+                </property>
+                <property>
+                    <name>spark.yarn.executor.memoryOverhead</name>
+                    <value>750</value>
+                </property>
+            </configuration>
+            <master>yarn-cluster</master>
+            <mode>cluster</mode>
+            <name>SM SLA Process</name>
+            <class>org.gogoair.info.SMLogProcessor</class>
+            <jar>${nameNode}/user/nchennamsetty/applications/sm-logs-process-assembly-1.0.jar</jar>
+            <spark-opts>--driver-memory 5g </spark-opts>
+            <arg>${nameNode}/data/canonical/year=2016/month=3/day=29/source=sm_sla/</arg>
+            <arg>${nameNode}/user/nchennamsetty/workflow_out/</arg>
+        </spark>
+        <ok to="End"/>
+        <error to="Kill"/>
+    </action>
+    <end name="End"/>
+</workflow-app>
+
